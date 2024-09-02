@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Badminton Scoreboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background-color: #000;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .container {
+            display: flex;
+            width: 100%;
+            height: 100%;
+            margin: 20px;
+            padding: 0;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            border-radius: 12px;
+            background-color: #333;
+            border: 1px solid #444;
+            box-sizing: border-box;
+        }
+
+        .player-box {
+            flex: 1;
+            padding: 20px;
+            box-sizing: border-box;
+            margin: 0 20px;
+            position: relative;
+            text-align: center;
+            border-radius: 12px;
+            background-color: #1e1e1e;
+            color: #f5f5f5;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            transition: background-color 0.3s;
+        }
+
+        .player-box h2 {
+            margin: 0;
+            font-size: 36px;
+            font-weight: 600;
+            color: #f5f5f5;
+        }
+
+        .player-box .score {
+            font-size: 600px;
+            font-weight: 900;
+            color: #f5f5f5;
+        }
+
+        .player-box .sub-score {
+            font-size: 60px;
+            font-weight: 300;
+            color: #aaa;
+            position: absolute;
+            top: 10px;
+            right: 50px;
+        }
+
+        .player-box.right .sub-score {
+            right: auto;
+            left: 50px;
+        }
+
+        .button {
+            position: absolute;
+            width: 120px;
+            height: 50px;
+            font-size: 18px;
+            font-weight: 600;
+            color: #f5f5f5;
+            background-color: #00796b;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            outline: none;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.3s;
+            text-align: center;
+        }
+
+        .refresh-button {
+            top: 20px;
+            right: 20px;
+        }
+
+        .remote-button {
+            top: 20px;
+            left: 20px;
+        }
+
+        .button:hover {
+            background-color: #004d40;
+        }
+        a{
+            text-decoration: none;
+            color: #fff;
+        }
+        @media (max-width: 768px) {
+            .container {
+                margin-top: 100px;
+        }
+
+
+            .player-box h2 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: 600;
+            margin-top: 0%;
+            color: #f5f5f5;
+        }
+
+        .player-box .sub-score {
+            font-size: 60px;
+            font-weight: 300;
+            color: #aaa;
+            position: absolute;
+            margin-top: 16%;
+            margin-left: 8px;
+            margin-right: 8px;
+            top: 10px;
+            right: 50px;
+        }
+
+            .container {
+                flex-direction: row;
+                height: auto;
+                padding: 10px;
+                margin: 10px;
+                margin-top: 10px;
+            }
+
+            .player-box {
+                margin: 0 10px;
+                width: calc(50% - 20px); /* Adjust width for better spacing */
+            }
+
+            .player-box .score {
+                font-size: 150px;
+            }
+
+            .player-box .sub-score {
+                font-size: 40px;
+                right: 10px;
+            }
+
+            .player-box.right .sub-score {
+                right: auto;
+                left: 10px;
+            }
+
+            .button {
+                width: 100px;
+                height: 45px;
+                font-size: 16px;
+                margin-top: 35%;
+                margin-left: -3%;
+                margin-left: -3%;
+            }
+        }
+    </style>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+
+// Track previous scores for comparison
+const previousScores = {
+    player1Score: 0,
+    player2Score: 0,
+    player1SubScore: 0,
+    player2SubScore: 0,
+};
+
+socket.on('scoreUpdate', (data) => {
+    // Update score display
+    document.getElementById('player1Score').innerText = data.player1Score;
+    document.getElementById('player2Score').innerText = data.player2Score;
+    document.getElementById('player1Name').innerText = data.player1Name;
+    document.getElementById('player2Name').innerText = data.player2Name;
+    document.getElementById('player1SubScore').innerText = data.player1SubScore;
+    document.getElementById('player2SubScore').innerText = data.player2SubScore;
+
+    // Handle score change effects
+    if (data.player1Score !== previousScores.player1Score) {
+        const player1ScoreElem = document.getElementById('player1Score');
+        player1ScoreElem.style.backgroundColor = '#a5d6a7'; // Green
+        setTimeout(() => player1ScoreElem.style.backgroundColor = '#1e1e1e', 500);
+        previousScores.player1Score = data.player1Score;
+    }
+
+    if (data.player2Score !== previousScores.player2Score) {
+        const player2ScoreElem = document.getElementById('player2Score');
+        player2ScoreElem.style.backgroundColor = '#a5d6a7'; // Green
+        setTimeout(() => player2ScoreElem.style.backgroundColor = '#1e1e1e', 500);
+        previousScores.player2Score = data.player2Score;
+    }
+
+    if (data.player1SubScore !== previousScores.player1SubScore) {
+        const player1SubScoreElem = document.getElementById('player1SubScore');
+        player1SubScoreElem.style.backgroundColor = '#a5d6a7'; // Green
+        setTimeout(() => player1SubScoreElem.style.backgroundColor = '#1e1e1e', 500);
+        previousScores.player1SubScore = data.player1SubScore;
+    }
+
+    if (data.player2SubScore !== previousScores.player2SubScore) {
+        const player2SubScoreElem = document.getElementById('player2SubScore');
+        player2SubScoreElem.style.backgroundColor = '#a5d6a7'; // Green
+        setTimeout(() => player2SubScoreElem.style.backgroundColor = '#1e1e1e', 500);
+        previousScores.player2SubScore = data.player2SubScore;
+    }
+});
+
+socket.on('nameUpdate', (data) => {
+    document.getElementById('player1Name').innerText = data.player1Name;
+    document.getElementById('player2Name').innerText = data.player2Name;
+});
+
+function refreshScores() {
+    location.reload();
+}
+    </script>
+</head>
+<body>
+    <div class="container">
+        <div class="player-box left">
+            <h2 id="player1Name">Player 1</h2>
+            <div class="sub-score" id="player1SubScore">0</div> <!-- Removed 'hidden' attribute -->
+            <div class="score" id="player1Score" data-prev-score="0">0</div>
+        </div>
+        <div class="player-box right">
+            <h2 id="player2Name">Player 2</h2>
+            <div class="sub-score" id="player2SubScore">0</div> <!-- Removed 'hidden' attribute -->
+            <div class="score" id="player2Score" data-prev-score="0">0</div>
+        </div>
+        
+    </div>
+    <button class="button refresh-button" onclick="refreshScores()">
+        Refresh
+    </button>
+    <a href="/remote" class="button remote-button">
+        Remote
+    </a>
+</body>
+</html>

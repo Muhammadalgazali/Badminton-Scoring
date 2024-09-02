@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Remote Control</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap">
+    <script src="/socket.io/socket.io.js"></script>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            text-align: center;
+            background-color: #000;
+            color: #fff;
+            margin: 0;
+            padding: 20px;
+        }
+        .player-container {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .player-section {
+            width: calc(50% - 10px); /* Mengurangi jarak antara elemen */
+            background-color: #333;
+            border: 2px solid #444;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+            box-sizing: border-box;
+        }
+        .player-section h2 {
+            margin: 10px 0;
+            color: #fff;
+        }
+        .score-container {
+            margin-bottom: 10px;
+            font-size: 18px;
+            color: #ccc;
+        }
+        .sub-score-container {
+            margin-bottom: 10px;
+            font-size: 16px;
+            color: #999;
+        }
+        .button-container, .button-group {
+            margin: 10px 0;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 18px;
+            margin: 5px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            background-color: #555;
+            color: #fff;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #777;
+        }
+        .button-group {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .button-group button {
+            flex: 1;
+            max-width: 200px;
+        }
+        .sub-button-group button {
+            max-width: 150px;
+            font-size: 14px;
+            padding: 5px 10px;
+        }
+        @media (max-width: 768px) {
+            .player-container {
+                flex-direction: column;
+            }
+            .player-section {
+                width: 100%;
+                margin-bottom: 20px;
+            }
+        }
+        @media (min-width: 769px) {
+            .player-container {
+                flex-direction: row; /* Pastikan elemen berdampingan pada perangkat dengan lebar lebih besar */
+            }
+        }
+        a{
+            text-decoration: none;
+            color: #fff;
+        }
+    </style>
+    <script>
+        const socket = io();
+
+        function updateScore(player, value, subValue = 0) {
+            socket.emit('updateScore', { player, value, subValue });
+        }
+
+        function changeName(player) {
+            const newName = prompt(`Enter new name for ${player}`);
+            if (newName) {
+                socket.emit('changeName', { player, name: newName });
+            }
+        }
+
+        function resetScore() {
+            socket.emit('resetScore');
+        }
+
+        function swapScores() {
+            socket.emit('swapScores');
+        }
+
+        function refresh() {
+            window.location.reload();
+        }
+
+        socket.on('scoreUpdate', (data) => {
+            document.getElementById('player1Score').innerText = data.player1Score;
+            document.getElementById('player2Score').innerText = data.player2Score;
+            document.getElementById('player1SubScore').innerText = data.player1SubScore;
+            document.getElementById('player2SubScore').innerText = data.player2SubScore;
+            document.getElementById('player1Name').innerText = data.player1Name;
+            document.getElementById('player2Name').innerText = data.player2Name;
+        });
+
+        socket.on('nameUpdate', (data) => {
+            document.getElementById('player1Name').innerText = data.player1Name;
+            document.getElementById('player2Name').innerText = data.player2Name;
+        });
+    </script>
+</head>
+<body>
+    <div class="player-container">
+        <div class="player-section">
+            <div class="score-container">
+                <span id="player1Score">0</span>
+            </div>
+            <div class="sub-score-container">
+                Sub-poin: <span id="player1SubScore">0</span>
+            </div>
+            <h2 id="player1Name">Player 1</h2>
+            <div class="button-group">
+                <button onclick="updateScore('player1', 1, 0)">Tambah Poin</button>
+                <button onclick="updateScore('player1', -1, 0)">Kurang Poin</button>
+            </div>
+            <div class="sub-button-group">
+                <button onclick="updateScore('player1', 0, 1)">Tambah</button>
+                <button onclick="updateScore('player1', 0, -1)">Kurang</button>
+            </div>
+            <div class="button-container">
+                <button onclick="changeName('player1')">Ubah Nama</button>
+            </div>
+        </div>
+        
+        <div class="player-section">
+            <div class="score-container">
+                <span id="player2Score">0</span>
+            </div>
+            <div class="sub-score-container">
+                Sub-poin: <span id="player2SubScore">0</span>
+            </div>
+            <h2 id="player2Name">Player 2</h2>
+            <div class="button-group">
+                <button onclick="updateScore('player2', 1, 0)">Tambah Poin</button>
+                <button onclick="updateScore('player2', -1, 0)">Kurang Poin</button>
+            </div>
+            <div class="sub-button-group">
+                <button onclick="updateScore('player2', 0, 1)">Tambah </button>
+                <button onclick="updateScore('player2', 0, -1)">Kurang</button>
+            </div>
+            <div class="button-container">
+                <button onclick="changeName('player2')">Ubah Nama</button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="button-container">
+        <button onclick="resetScore()">Reset Skor</button>
+        <button onclick="swapScores()">Tukar Skor</button>
+
+        <button>
+            <a href="/display">
+                Tampilkan di Monitor
+            </a>
+        </button>
+        <button onclick="refresh()">Refresh</button>
+    </div>
+</body>
+</html>
